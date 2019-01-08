@@ -24,6 +24,7 @@ import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
 import android.app.ActivityManager;
 import android.util.DisplayMetrics;
+import android.content.pm.ApplicationInfo;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -181,7 +182,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
       }
     }
 
-    p.resolve(macAddress);    
+    p.resolve(macAddress);
   }
 
   @ReactMethod
@@ -254,11 +255,14 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
       PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
       PackageInfo info = packageManager.getPackageInfo(packageName, 0);
       String applicationName = this.reactContext.getApplicationInfo().loadLabel(this.reactContext.getPackageManager()).toString();
+      ApplicationInfo ai = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+
       constants.put("appVersion", info.versionName);
       constants.put("buildNumber", info.versionCode);
       constants.put("firstInstallTime", info.firstInstallTime);
       constants.put("lastUpdateTime", info.lastUpdateTime);
       constants.put("appName", applicationName);
+      constants.put("uriScheme", ai.metaData.getString("uriScheme"));
     } catch (PackageManager.NameNotFoundException e) {
       e.printStackTrace();
     }
@@ -286,6 +290,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     } catch (ClassNotFoundException e) {
       constants.put("instanceId", "N/A: Add com.google.android.gms:play-services-gcm to your project.");
     }
+
     constants.put("serialNumber", Build.SERIAL);
     constants.put("deviceName", deviceName);
     constants.put("systemName", "Android");

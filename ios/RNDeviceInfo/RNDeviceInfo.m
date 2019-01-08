@@ -191,6 +191,26 @@ RCT_EXPORT_MODULE(RNDeviceInfo)
     return language;
 }
 
+- (NSString*) uriScheme
+{
+    if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]) {
+        NSArray *urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
+        NSString *scheme = @"scannerapp";
+        for(NSDictionary *urlType in urlTypes)
+        {
+            if(urlType[@"CFBundleURLName"] && [urlType[@"CFBundleURLName"] isEqualToString:scheme])
+            {
+                NSArray *urlSchemes = urlType[@"CFBundleURLSchemes"];
+                for(NSString *urlScheme in urlSchemes)
+                    return urlScheme;
+            }
+
+        }
+    }
+
+    return @"";
+}
+
 - (NSString*) deviceCountry
 {
   NSString *country = [[NSLocale currentLocale] objectForKey:NSLocaleCountryCode];
@@ -241,7 +261,7 @@ RCT_EXPORT_MODULE(RNDeviceInfo)
 }
 
 - (NSDictionary *) getStorageDictionary {
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);  
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     return [[NSFileManager defaultManager] attributesOfFileSystemForPath:[paths lastObject] error: nil];
 }
 
@@ -259,7 +279,7 @@ RCT_EXPORT_MODULE(RNDeviceInfo)
 - (uint64_t) freeDiskStorage {
     uint64_t freeSpace = 0;
     NSDictionary *storage = [self getStorageDictionary];
-    
+
     if (storage) {
         NSNumber *freeFileSystemSizeInBytes = [storage objectForKey: NSFileSystemFreeSize];
         freeSpace = [freeFileSystemSizeInBytes unsignedLongLongValue];
@@ -281,6 +301,7 @@ RCT_EXPORT_MODULE(RNDeviceInfo)
              @"deviceId": self.deviceId ?: [NSNull null],
              @"deviceName": currentDevice.name,
              @"deviceLocale": self.deviceLocale ?: [NSNull null],
+             @"uriScheme": self.uriScheme ?: [NSNull null],
              @"deviceCountry": self.deviceCountry ?: [NSNull null],
              @"uniqueId": uniqueId,
              @"appName": [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"] ?: [NSNull null],
@@ -305,7 +326,7 @@ RCT_EXPORT_METHOD(getMacAddress:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
 {
     NSString *address = @"02:00:00:00:00:00";
     resolve(address);
-} 
+}
 
 RCT_EXPORT_METHOD(getIpAddress:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -335,7 +356,7 @@ RCT_EXPORT_METHOD(getIpAddress:(RCTPromiseResolveBlock)resolve rejecter:(RCTProm
     // Free memory
     freeifaddrs(interfaces);
     resolve(address);
-} 
+}
 
 RCT_EXPORT_METHOD(isPinOrFingerprintSet:(RCTResponseSenderBlock)callback)
 {
